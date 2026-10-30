@@ -1,0 +1,32 @@
+/* Generated design tokens. Data only - safe to import; nothing here executes. */
+:root {
+  --amani-primary-50: #ecf9f8;
+  --amani-primary-100: #d5f2ef;
+  --amani-primary-200: #aae5df;
+  --amani-primary-300: #7bd7cd;
+  --amani-primary-400: #48c8ba;
+  --amani-primary-500: #14b8a6;
+  --amani-primary-600: #119b8b;
+  --amani-primary-700: #0e7d71;
+  --amani-primary-800: #0a5c53;
+  --amani-primary-900: #063b35;
+  --amani-accent-50: #fdf8ee;
+  --amani-accent-100: #f9efd8;
+  --amani-accent-200: #f4dfb1;
+  --amani-accent-300: #eecd85;
+  --amani-accent-400: #e7b956;
+  --amani-accent-500: #e0a526;
+  --amani-accent-600: #bc8b20;
+  --amani-accent-700: #98701a;
+  --amani-accent-800: #705213;
+  --amani-accent-900: #48350c;
+
+  --amani-background: #ecf9f8;
+  --amani-surface: #ffffff;
+  --amani-text: #063b35;
+  --amani-text-muted: #0e7d71;
+  --amani-primary: #14b8a6;
+  --amani-primary-hover: #119b8b;
+  --amani-border: #aae5df;
+  --amani-accent: #e0a526;
+}

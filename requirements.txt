@@ -1,0 +1,7 @@
+google-genai>=1.0.0
+streamlit>=1.45
+gTTS>=2.5
+pypdf>=4.0
+pypdfium2>=4.0
+pillow-heif>=0.16
+requests>=2.31

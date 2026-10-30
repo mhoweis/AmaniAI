@@ -1,0 +1,19 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Amani's saved demo results (may contain document text)
+cache/
+
+# Secrets: API keys and bot tokens live in environment variables, never in files
+.env
+*.env
+secrets.toml
+.streamlit/secrets.toml
+
+# Mac / editor
+.DS_Store
+.idea/
+.vscode/
