@@ -195,8 +195,8 @@ audio = st.audio_input(T["voice_label"], key=f"voice_{ss.voice_round}")
 if audio is not None:
     st.caption(T["voice_review"])
     col_send, col_delete = st.columns(2)
-    send = col_send.button(T["voice_send"], type="primary", use_container_width=True)
-    col_delete.button(T["voice_delete"], on_click=reset_recorder, use_container_width=True)
+    send = col_send.button(T["voice_send"], type="primary", width="stretch")
+    col_delete.button(T["voice_delete"], on_click=reset_recorder, width="stretch")
     if send:
         with st.spinner(T["voice_working"]):
             heard = transcribe(audio.getvalue(), audio.type or "audio/wav")
@@ -228,7 +228,7 @@ with tab_text:
                  placeholder=T["doc_label"])
     with st.expander(T["samples"]):
         for name in SAMPLES:
-            st.button(name, on_click=load_sample, args=(name,), use_container_width=True)
+            st.button(name, on_click=load_sample, args=(name,), width="stretch")
 with tab_photo:
     upload = st.file_uploader(T["photo_label"], type=None, key=f"upload_{ss.get('upload_round', 0)}")
     if upload:
@@ -241,13 +241,13 @@ with tab_photo:
         for code in f["alerts"]:
             show(f'<div class="file-alert a-{code}">{e(T["file_alert"][code])}</div>')
         if f["images"] and f["kind"] != "pdf (scanned)":
-            st.image(f["images"][0][0], use_container_width=True)
+            st.image(f["images"][0][0], width="stretch")
     else:
         ss.pop("file", None)
         ss.pop("file_id", None)
 
 st.write("")
-if st.button(f"🛡️  {T['check']}", type="primary", use_container_width=True):
+if st.button(f"🛡️  {T['check']}", type="primary", width="stretch"):
     f = ss.get("file") if upload else None
     has_file = bool(f and (f["text"].strip() or f["images"] or "dangerous_file" in f["alerts"]))
     if not ss.doc.strip() and not has_file:
@@ -356,7 +356,7 @@ if r:
         if not name:
             st.caption(T["bg_no_name"])
         elif bg is None:
-            if st.button(T["bg_button"], use_container_width=True):
+            if st.button(T["bg_button"], width="stretch"):
                 with st.spinner(T["bg_working"]):
                     ss.company_bg = company_background(
                         name, r.get("detected_variety") or r.get("detected_language") or "English")
@@ -394,7 +394,7 @@ if r:
 
         # --- share with a trusted person ---
         summary = f"{VERDICT_ICON[rec]} {T['verdict'][rec]}\n{r['headline']}\n{r['next_step']}\n— Amani"
-        st.link_button(T["share"], f"https://wa.me/?text={urlquote(summary)}", use_container_width=True)
+        st.link_button(T["share"], f"https://wa.me/?text={urlquote(summary)}", width="stretch")
 
         show(f'<div class="safety" dir="{d(lang)}">🔒 {e(r["safety_line"])}</div>')
         if r.get("from_cache"):

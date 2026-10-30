@@ -330,7 +330,9 @@ def handle(update):
         elif "callback_query" in update:
             on_callback(update["callback_query"])
     except Exception as ex:  # noqa: BLE001  never let one chat crash the bot
-        print("error:", type(ex).__name__, str(ex)[:200])
+        import traceback
+        print("❌ Error while answering:", type(ex).__name__, str(ex)[:300])
+        traceback.print_exc(limit=3)
         chat = (update.get("message") or (update.get("callback_query") or {}).get("message") or {}).get("chat", {})
         if chat.get("id"):
             T = texts(state(chat["id"])["ui"])
@@ -339,21 +341,46 @@ def handle(update):
 
 def main():
     if not TOKEN:
-        raise SystemExit("Set TELEGRAM_BOT_TOKEN first (get it from @BotFather in Telegram).")
-    me = call("getMe").get("result", {})
-    print(f"Amani is live on Telegram: https://t.me/{me.get('username')}   (Ctrl+C to stop)")
+        raise SystemExit("❌ TELEGRAM_BOT_TOKEN is not set in this terminal. Run: export TELEGRAM_BOT_TOKEN=\"...\"")
+    if not (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")):
+        print("⚠️  GEMINI_API_KEY is not set in this terminal: the bot will answer, but every check will fail.")
+    try:
+        me = call("getMe")
+    except requests.RequestException as ex:
+        raise SystemExit(f"❌ Can't reach Telegram from this computer: {ex}")
+    if not me.get("ok"):
+        raise SystemExit(f"❌ Telegram rejected the token: {me.get('description')}. Copy it again from @BotFather "
+                         "(the whole thing, like 123456789:ABC...), with no spaces or quotes inside.")
+    # A webhook left over from another tool blocks polling; remove it (pending messages are kept).
+    call("deleteWebhook", drop_pending_updates=False)
     call("setMyCommands", commands=[{"command": "start", "description": "Start / choose language"},
                                     {"command": "lang", "description": "Change language"},
                                     {"command": "reset", "description": "Start over"}])
+    print(f"✅ Amani is live on Telegram: https://t.me/{me['result']['username']}   (Ctrl+C to stop)")
+    print("   Waiting for messages… each one is shown below.")
     pool, offset = ThreadPoolExecutor(max_workers=4), None
     while True:
         try:
             res = requests.get(API + "getUpdates", params={"timeout": 50, "offset": offset}, timeout=60).json()
-            for update in res.get("result", []):
-                offset = update["update_id"] + 1
-                pool.submit(handle, update)  # slow checks don't block other chats
-        except requests.RequestException:
+        except requests.RequestException as ex:
+            print(f"⚠️  Connection problem, retrying in 3 s: {type(ex).__name__}")
             time.sleep(3)
+            continue
+        if not res.get("ok"):
+            code, desc = res.get("error_code"), res.get("description", "")
+            if code == 409:
+                print("❌ Another copy of this bot is already running (another terminal, or a webhook). "
+                      "Close the other terminal, then start this one again.")
+            else:
+                print(f"❌ Telegram error {code}: {desc}")
+            time.sleep(5)
+            continue
+        for update in res.get("result", []):
+            offset = update["update_id"] + 1
+            m = update.get("message") or {}
+            kind = next((k for k in ("text", "voice", "audio", "photo", "document") if k in m), "button" if "callback_query" in update else "other")
+            print(f"📩 {time.strftime('%H:%M:%S')}  {kind} from chat {(m.get('chat') or {}).get('id', '')}")
+            pool.submit(handle, update)  # slow checks don't block other chats
 
 
 if __name__ == "__main__":
