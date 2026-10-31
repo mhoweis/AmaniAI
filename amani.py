@@ -13,9 +13,31 @@ from urllib.parse import urlparse
 from google import genai
 from google.genai import types
 
+HERE = Path(__file__).parent
+
+
+def load_env(path: Path = HERE / ".env") -> None:
+    """Read KEY=value lines from .env into the environment.
+    Values already set in the terminal win, so `export` still overrides the file."""
+    if not path.exists():
+        return
+    for line in path.read_text(encoding="utf-8-sig").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.removeprefix("export ").strip()
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        if key and value and key not in os.environ:
+            os.environ[key] = value
+
+
+load_env()
+
 # gemma-4-26b-a4b-it is faster (good for a live demo); gemma-4-31b-it is stronger on dialects.
 MODEL = os.environ.get("AMANI_MODEL", "gemma-4-26b-a4b-it")
-HERE = Path(__file__).parent
 SYSTEM_PROMPT = (HERE / "system_prompt.txt").read_text(encoding="utf-8")
 CACHE_DIR = HERE / "cache"
 

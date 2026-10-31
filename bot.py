@@ -82,8 +82,21 @@ def call(method, files=None, **params):
     for k, v in list(params.items()):
         if isinstance(v, (dict, list)):
             params[k] = json.dumps(v, ensure_ascii=False)
-    r = requests.post(API + method, data=params, files=files, timeout=70)
-    return r.json()
+    try:
+        r = requests.post(API + method, data=params, files=files, timeout=70)
+        res = r.json()
+    except Exception as ex:  # noqa: BLE001
+        print(f"❌ {method} failed: could not reach Telegram ({type(ex).__name__}: {str(ex)[:150]})")
+        return {"ok": False}
+    if method in ("sendMessage", "sendAudio"):
+        if res.get("ok"):
+            print(f"   ↩️  {method} delivered")
+        else:
+            print(f"❌ Telegram refused {method}: {res.get('description')}")
+            if method == "sendMessage" and "parse" in str(res.get("description", "")).lower():
+                params.pop("parse_mode", None)  # retry as plain text if formatting was the problem
+                return requests.post(API + method, data=params, timeout=70).json()
+    return res
 
 
 def send(chat_id, text, buttons=None):
@@ -341,9 +354,9 @@ def handle(update):
 
 def main():
     if not TOKEN:
-        raise SystemExit("❌ TELEGRAM_BOT_TOKEN is not set in this terminal. Run: export TELEGRAM_BOT_TOKEN=\"...\"")
+        raise SystemExit("❌ TELEGRAM_BOT_TOKEN is missing. Add a line TELEGRAM_BOT_TOKEN=... to the .env file in this folder.")
     if not (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")):
-        print("⚠️  GEMINI_API_KEY is not set in this terminal: the bot will answer, but every check will fail.")
+        print("⚠️  GEMINI_API_KEY is missing from .env: the bot will answer, but every check will fail.")
     try:
         me = call("getMe")
     except requests.RequestException as ex:

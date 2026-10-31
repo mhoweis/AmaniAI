@@ -22,14 +22,23 @@ Default model is `gemma-4-26b-a4b-it` (faster for a live demo).
 4. **A guard layer** validates the JSON, forbids a "safe" verdict, blocks "continue carefully" when a link is a lookalike, makes links unclickable, and falls back to "cannot tell" on any error.
 5. A fixed, pre-written safety line (not AI-generated) and a **Listen** button for people who can't read easily.
 
+## Keys (.env)
+
+Copy `.env.example` to `.env` in this folder and paste your values:
+
+```
+GEMINI_API_KEY=your-gemini-key
+TELEGRAM_BOT_TOKEN=token-from-botfather
+```
+
+Both the web app and the bot read it on start. `.env` is in `.gitignore`, so it never goes to GitHub. A value set with `export` in the terminal overrides the file.
+
 ## Telegram bot (5 minutes)
 
 1. In Telegram, open **@BotFather**, send `/newbot`, pick a name and a username ending in `bot`, and copy the token.
-2. In a **second** terminal in this folder:
+2. Put the token in your `.env` file (see **Keys** below), then in a **second** terminal in this folder:
    ```bash
    source .venv/bin/activate
-   export GEMINI_API_KEY="your-key"
-   export TELEGRAM_BOT_TOKEN="token-from-botfather"
    python bot.py
    ```
 3. It prints your bot link (`https://t.me/yourbot`). Keep this terminal open while you demo.
